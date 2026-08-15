@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Bouncer Protocol – Private Protection & Public Events Security</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ────────────── RESET & BASE ────────────── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e17;
+            --secondary: #1a1f2e;
+            --accent: #c9a84c;
+            --accent-light: #e8d17a;
+            --text: #f0f2f5;
+            --text-muted: #aab0b8;
+            --white: #ffffff;
+            --radius: 12px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --transition: 0.3s ease;
+            --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --header-height: 80px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        ul {
+            list-style: none;
+        }
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ────────────── BUTTONS ────────────── */
+        .btn {
+            display: inline-block;
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--primary);
+            box-shadow: 0 4px 16px rgba(201, 168, 76, 0.35);
+        }
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(201, 168, 76, 0.45);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--accent);
+        }
+        .btn-outline:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .btn-sm {
+            padding: 10px 24px;
+            font-size: 14px;
+        }
+
+        /* ────────────── HEADER / NAV ────────────── */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 14, 23, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+            transition: var(--transition);
+            height: var(--header-height);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            padding: 0 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            height: 56px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-sub {
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            -webkit-text-fill-color: var(--text-muted);
+        }
+
+        /* Hide logo text on very small screens */
+        @media (max-width: 400px) {
+            .logo-text {
+                font-size: 16px;
+            }
+            .logo-sub {
+                font-size: 7px;
+                letter-spacing: 1px;
+            }
+            .logo img {
+                height: 28px;
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            color: var(--white);
+        }
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links .btn {
+            padding: 8px 20px;
+            font-size: 13px;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+            flex-shrink: 0;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 26px;
+            height: 2.5px;
+            background: var(--white);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* ────────────── MOBILE NAV ────────────── */
+        @media (max-width: 992px) {
+            .nav-links {
+                position: fixed;
+                top: var(--header-height);
+                left: 0;
+                width: 100%;
+                background: var(--primary);
+                flex-direction: column;
+                padding: 20px 24px 28px;
+                gap: 16px;
+                border-bottom: 1px solid rgba(201, 168, 76, 0.06);
+                transform: translateY(-120%);
+                transition: all 0.35s ease;
+                opacity: 0;
+                visibility: hidden;
+                backdrop-filter: blur(12px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            }
+
+            .nav-links.open {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-links a {
+                font-size: 17px;
+                padding: 8px 0;
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links .btn {
+                padding: 12px 28px;
+                font-size: 15px;
+                width: 100%;
+                text-align: center;
+            }
+
+            .hamburger {
+                display: flex;
+            }
+
+            .hero-content h1 {
+                font-size: 32px;
+            }
+
+            .hero-content p {
+                font-size: 16px;
+            }
+
+            .hero-stats {
+                gap: 20px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero-stats strong {
+                font-size: 26px;
+            }
+
+            .hero-image .badge-grid {
+                grid-template-columns: 1fr 1fr;
+                padding: 20px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .about .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .about-features {
+                justify-items: center;
+            }
+
+            footer .container {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+                text-align: center;
+            }
+
+            footer .brand p {
+                max-width: 100%;
+            }
+
+            footer .brand .socials {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 64px;
+            }
+
+            header .container {
+                padding: 0 12px;
+            }
+
+            .logo img {
+                height: 30px;
+            }
+
+            .logo-text {
+                font-size: 17px;
+            }
+
+            .logo-sub {
+                font-size: 7px;
+                letter-spacing: 1px;
+            }
+
+            .hero {
+                padding: 100px 0 50px;
+                min-height: auto;
+            }
+
+            .hero-content h1 {
+                font-size: 28px;
+            }
+
+            .hero-content p {
+                font-size: 15px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .hero-stats {
+                gap: 16px;
+            }
+
+            .hero-stats strong {
+                font-size: 22px;
+            }
+
+            .hero-stats span {
+                font-size: 12px;
+            }
+
+            .hero-image .badge-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                padding: 16px;
+                max-width: 100%;
+            }
+
+            .hero-image .badge-item {
+                padding: 12px 6px;
+            }
+
+            .hero-image .badge-item i {
+                font-size: 24px;
+            }
+
+            .hero-image .badge-item h4 {
+                font-size: 12px;
+            }
+
+            .hero-image .badge-item p {
+                font-size: 10px;
+            }
+
+            .section-title h2 {
+                font-size: 26px;
+            }
+
+            .section-title p {
+                font-size: 15px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .service-card {
+                padding: 28px 20px;
+            }
+
+            .about {
+                padding: 50px 0;
+            }
+
+            .about-content h2 {
+                font-size: 26px;
+            }
+
+            .about-features {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta {
+                padding: 50px 0;
+            }
+
+            .cta h2 {
+                font-size: 26px;
+            }
+
+            .cta p {
+                font-size: 16px;
+            }
+
+            .cta .btn-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .cta .btn-group .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            footer .container {
+                grid-template-columns: 1fr;
+                gap: 28px;
+                text-align: center;
+            }
+
+            footer .brand .socials {
+                justify-content: center;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 14px;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 24px;
+            }
+
+            .hero-image .badge-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 12px;
+            }
+
+            .hero-image .badge-item i {
+                font-size: 20px;
+            }
+
+            .hero-image .badge-item h4 {
+                font-size: 11px;
+            }
+
+            .section-title h2 {
+                font-size: 22px;
+            }
+
+            .service-card h3 {
+                font-size: 17px;
+            }
+
+            .service-card p {
+                font-size: 14px;
+            }
+
+            .stat-item {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+
+            .stat-item span {
+                font-size: 14px;
+            }
+
+            .footer .bottom {
+                font-size: 12px;
+            }
+
+            .logo-text {
+                font-size: 14px;
+            }
+
+            .logo-sub {
+                font-size: 6px;
+                letter-spacing: 0.5px;
+            }
+
+            .logo img {
+                height: 24px;
+            }
+
+            .container {
+                padding: 0 12px;
+            }
+        }
+
+        /* ────────────── HERO ────────────── */
+        .hero {
+            padding: 140px 0 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, #111827 50%, var(--secondary) 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 992px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+
+            .hero-content p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .hero-image .badge-grid {
+                margin: 0 auto;
+            }
+
+            .hero-image .badge-grid {
+                max-width: 340px;
+            }
+        }
+
+        .hero-content h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .hero-content h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 520px;
+            margin-bottom: 28px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .hero-stats div {
+            text-align: left;
+        }
+
+        .hero-stats strong {
+            display: block;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .hero-stats span {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .hero-stats div {
+                text-align: center;
+            }
+        }
+
+        .hero-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-image .badge-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            background: rgba(26, 31, 46, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero-image .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 16px 8px;
+            border-radius: 8px;
+            background: rgba(10, 14, 23, 0.5);
+            transition: var(--transition);
+        }
+
+        .hero-image .badge-item:hover {
+            background: rgba(201, 168, 76, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .hero-image .badge-item i {
+            font-size: 32px;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .hero-image .badge-item h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hero-image .badge-item p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ────────────── SECTION TITLES ────────────── */
+        .section-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(201, 168, 76, 0.1);
+            padding: 4px 16px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(201, 168, 76, 0.15);
+        }
+
+        .section-title {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 48px;
+        }
+
+        .section-title h2 {
+            font-size: 38px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-title h2 span {
+            color: var(--accent);
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 17px;
+        }
+
+        /* ────────────── SERVICES ────────────── */
+        .services {
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .service-card {
+            background: var(--primary);
+            border: 1px solid rgba(201, 168, 76, 0.08);
+            border-radius: var(--radius);
+            padding: 32px 24px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: var(--transition);
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(201, 168, 76, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .service-card .icon {
+            font-size: 36px;
+            color: var(--accent);
+            margin-bottom: 14px;
+            display: block;
+        }
+
+        .service-card h3 {
+            font-size: 19px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* ────────────── ABOUT ────────────── */
+        .about {
+            padding: 80px 0;
+            background: var(--primary);
+        }
+
+        .about .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-image {
+            background: var(--secondary);
+            border-radius: var(--radius);
+            padding: 40px;
+            border: 1px solid rgba(201, 168, 76, 0.08);
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            color: var(--accent);
+            opacity: 0.6;
+        }
+
+        .about-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .about-content h2 span {
+            color: var(--accent);
+        }
+
+        .about-content p {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+
+        .about-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            margin-top: 20px;
+        }
+
+        .about-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .about-features li i {
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        /* ────────────── TESTIMONIALS ────────────── */
+        .testimonials {
+            padding: 80px 0;
+            background: var(--secondary);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .testimonial-card {
+            background: var(--primary);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            border: 1px solid rgba(201, 168, 76, 0.06);
+            transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+            border-color: rgba(201, 168, 76, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .testimonial-card .stars {
+            color: var(--accent);
+            font-size: 15px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .testimonial-card blockquote {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 14px;
+        }
+
+        .testimonial-card .author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .testimonial-card .author .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid rgba(201, 168, 76, 0.15);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .testimonial-card .author .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .testimonial-card .author .role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ────────────── CTA ────────────── */
+        .cta {
+            padding: 70px 0;
+            background: linear-gradient(135deg, var(--primary), #111827);
+            text-align: center;
+            border-top: 1px solid rgba(201, 168, 76, 0.08);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.08);
+        }
+
+        .cta h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .cta h2 span {
+            color: var(--accent);
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 17px;
+            max-width: 560px;
+            margin: 0 auto 28px;
+        }
+
+        .cta .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* ────────────── FOOTER ────────────── */
+        footer {
+            padding: 50px 0 24px;
+            background: var(--primary);
+            border-top: 1px solid rgba(201, 168, 76, 0.06);
+        }
+
+        footer .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 36px;
+        }
+
+        footer .brand h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        footer .brand h3 span {
+            color: var(--accent);
+        }
+
+        footer .brand p {
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 300px;
+            line-height: 1.7;
+        }
+
+        footer .brand .socials {
+            display: flex;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        footer .brand .socials a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: var(--text-muted);
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        footer .brand .socials a:hover {
+            background: var(--accent);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        footer h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--white);
+        }
+
+        footer ul li {
+            margin-bottom: 8px;
+        }
+
+        footer ul li a {
+            color: var(--text-muted);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        footer ul li a:hover {
+            color: var(--accent);
+        }
+
+        footer .bottom {
+            grid-column: 1 / -1;
+            border-top: 1px solid rgba(201, 168, 76, 0.06);
+            padding-top: 18px;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ────────────── RESPONSIVE OVERRIDES ────────────── */
+        @media (max-width: 992px) {
+            .about .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .about-features {
+                justify-items: center;
+            }
+
+            footer .container {
+                grid-template-columns: 1fr 1fr;
+                text-align: center;
+            }
+
+            footer .brand p {
+                max-width: 100%;
+            }
+
+            footer .brand .socials {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .services {
+                padding: 50px 0;
+            }
+
+            .about {
+                padding: 50px 0;
+            }
+
+            .testimonials {
+                padding: 50px 0;
+            }
+
+            .cta {
+                padding: 40px 0;
+            }
+
+            footer {
+                padding: 40px 0 20px;
+            }
+
+            footer .container {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                text-align: center;
+            }
+
+            footer .brand .socials {
+                justify-content: center;
+            }
+
+            .about-image {
+                min-height: 180px;
+                font-size: 48px;
+                padding: 24px;
+            }
+
+            .hero-image .badge-grid {
+                max-width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .hero-buttons .btn {
+                max-width: 100%;
+            }
+
+            .cta .btn-group .btn {
+                max-width: 100%;
+            }
+
+            .section-title h2 {
+                font-size: 24px;
+            }
+
+            .section-title p {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 80px 0 40px;
+            }
+
+            .hero-content h1 {
+                font-size: 22px;
+            }
+
+            .hero-content p {
+                font-size: 14px;
+            }
+
+            .service-card {
+                padding: 20px 16px;
+            }
+
+            .service-card h3 {
+                font-size: 16px;
+            }
+
+            .service-card p {
+                font-size: 13px;
+            }
+
+            .testimonial-card {
+                padding: 20px 16px;
+            }
+
+            .testimonial-card blockquote {
+                font-size: 14px;
+            }
+
+            .about-content h2 {
+                font-size: 22px;
+            }
+
+            .about-content p {
+                font-size: 14px;
+            }
+
+            .about-features li {
+                font-size: 13px;
+            }
+
+            .cta h2 {
+                font-size: 22px;
+            }
+
+            .cta p {
+                font-size: 14px;
+            }
+
+            footer .brand h3 {
+                font-size: 18px;
+            }
+
+            footer .brand p {
+                font-size: 13px;
+            }
+
+            footer h4 {
+                font-size: 14px;
+            }
+
+            footer ul li a {
+                font-size: 13px;
+            }
+
+            footer .bottom {
+                font-size: 11px;
+            }
+
+            .hero-stats {
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .hero-stats strong {
+                font-size: 20px;
+            }
+
+            .hero-stats span {
+                font-size: 11px;
+            }
+
+            .hero-image .badge-item i {
+                font-size: 18px;
+            }
+
+            .hero-image .badge-item h4 {
+                font-size: 10px;
+            }
+
+            .hero-image .badge-item p {
+                font-size: 9px;
+            }
+
+            .stat-item {
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+
+            .stat-item span {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ HEADER ============ -->
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <img src="image/bounce-logo.png" alt="Bouncer Protocol Logo" />
+                <div>
+                    <div class="logo-text">Bouncer Protocol</div>
+                    <div class="logo-sub">Private Protection &bull; Public Events</div>
+                </div>
+            </a>
+
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="services.html">Services</a>
+                <a href="about.html">About</a>
+                <a href="pricing.html">Pricing</a>
+                <a href="contact.html" class="btn btn-primary">Get Protected</a>
+            </nav>
+
+            <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <span class="section-tag">Premium Security</span>
+                <h1>
+                    Private Protection &amp;<br />
+                    <span>Public Events Security</span>
+                </h1>
+                <p>
+                    Bouncer Protocol delivers elite security solutions for high‑profile individuals,
+                    corporate executives, and large‑scale public events. Discreet. Professional. Relentless.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn btn-primary">Request a Quote</a>
+                    <a href="#services" class="btn btn-outline">Explore Services</a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <strong>500+</strong>
+                        <span>Events Secured</span>
+                    </div>
+                    <div>
+                        <strong>98%</strong>
+                        <span>Client Satisfaction</span>
+                    </div>
+                    <div>
+                        <strong>24/7</strong>
+                        <span>Rapid Response</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-image">
+                <div class="badge-grid">
+                    <div class="badge-item">
+                        <i class="fas fa-user-shield"></i>
+                        <h4>Executive Protection</h4>
+                        <p>VIP &amp; corporate security</p>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-people-arrows"></i>
+                        <h4>Event Security</h4>
+                        <p>Concerts, festivals, &amp; more</p>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-building"></i>
+                        <h4>Corporate Safety</h4>
+                        <p>Offices &amp; private premises</p>
+                    </div>
+                    <div class="badge-item">
+                        <i class="fas fa-car-side"></i>
+                        <h4>Close Protection</h4>
+                        <p>Personal &amp; family security</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ SERVICES ============ -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-title">
+                <span class="section-tag">What We Offer</span>
+                <h2>Elite Security <span>Solutions</span></h2>
+                <p>Tailored protection for every client, from private individuals to large‑scale public gatherings.</p>
+            </div>
+
+            <div class="services-grid">
+                <div class="service-card">
+                    <i class="fas fa-user-lock icon"></i>
+                    <h3>Private Protection</h3>
+                    <p>Discreet, highly trained bodyguards for executives, celebrities, and high‑net‑worth individuals. 24/7 close protection with threat assessment.</p>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-people-group icon"></i>
+                    <h3>Public Events Security</h3>
+                    <p>Comprehensive security for concerts, festivals, sporting events, and political rallies. Crowd control, access management, and emergency response.</p>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-building-shield icon"></i>
+                    <h3>Corporate Security</h3>
+                    <p>Executive protection, office premises security, and VIP transport. Risk assessment and active threat monitoring for your business.</p>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-handshake icon"></i>
+                    <h3>VIP Escort &amp; Concierge</h3>
+                    <p>Low‑profile, professional escort services for high‑profile individuals. Discreet, courteous, and meticulously planned.</p>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-video icon"></i>
+                    <h3>Surveillance &amp; Monitoring</h3>
+                    <p>Advanced CCTV, drone surveillance, and real‑time monitoring for events and private estates. Proactive threat detection.</p>
+                </div>
+
+                <div class="service-card">
+                    <i class="fas fa-shield icon"></i>
+                    <h3>Risk Assessment &amp; Consulting</h3>
+                    <p>Comprehensive security audits, vulnerability assessments, and strategic protection planning for individuals and organisations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-image">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <div class="about-content">
+                <span class="section-tag">About Us</span>
+                <h2>Your Safety Is <span>Our Protocol</span></h2>
+                <p>
+                    Bouncer Protocol was founded by former military and law enforcement professionals with a
+                    single mission: to provide world‑class security that is both discreet and unwavering.
+                </p>
+                <p>
+                    We combine cutting‑edge technology with battle‑tested tactics to deliver protection that
+                    anticipates threats before they emerge. Our clients trust us because we don't just respond
+                    — we prevent.
+                </p>
+                <ul class="about-features">
+                    <li><i class="fas fa-check-circle"></i> Licensed &amp; Insured</li>
+                    <li><i class="fas fa-check-circle"></i> Former Military &amp; Law Enforcement</li>
+                    <li><i class="fas fa-check-circle"></i> 24/7 Rapid Deployment</li>
+                    <li><i class="fas fa-check-circle"></i> Customised Security Plans</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ TESTIMONIALS ============ -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <span class="section-tag">Testimonials</span>
+                <h2>What Our Clients <span>Say</span></h2>
+                <p>Real feedback from individuals and organisations we've protected.</p>
+            </div>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>
+                        “Bouncer Protocol handled security for our 10,000‑person music festival flawlessly.
+                        Professional, calm, and effective. We'll never use anyone else.”
+                    </blockquote>
+                    <div class="author">
+                        <div class="avatar">M</div>
+                        <div>
+                            <div class="name">Michael O.</div>
+                            <div class="role">Event Organiser, Lagos</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>
+                        “I needed discreet protection for a high‑stakes business trip. Their team was
+                        invisible but always present. Absolute peace of mind.”
+                    </blockquote>
+                    <div class="author">
+                        <div class="avatar">S</div>
+                        <div>
+                            <div class="name">Sarah K.</div>
+                            <div class="role">Corporate Executive, Nairobi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>
+                        “They secured our private estate during a high‑profile family event. Every detail
+                        was handled with precision. Highly recommended.”
+                    </blockquote>
+                    <div class="author">
+                        <div class="avatar">J</div>
+                        <div>
+                            <div class="name">James A.</div>
+                            <div class="role">Private Client, Accra</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta" id="contact">
+        <div class="container">
+            <h2>Ready to <span>Secure</span> Your World?</h2>
+            <p>Contact us today for a confidential consultation. Your safety is non‑negotiable.</p>
+            <div class="btn-group">
+                <a href="mailto:abolarindaniel@yahoo.com" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Email Us
+                </a>
+                <a href="tel:+234 803 484 5271" class="btn btn-outline">
+                    <i class="fas fa-phone"></i> Call Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer>
+        <div class="container">
+            <div class="brand">
+                <h3><i class="fas fa-shield-halved" style="color: var(--accent);"></i> Bouncer <span>Protocol</span></h3>
+                <p>
+                    Professional private protection and public events security.
+                    Discreet. Professional. Relentless.
+                </p>
+                <div class="socials">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="pricing.html">Pricing</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="services.html#private">Private Protection</a></li>
+                    <li><a href="services.html#events">Event Security</a></li>
+                    <li><a href="services.html#corporate">Corporate Safety</a></li>
+                    <li><a href="services.html#vip">VIP Escort</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="mailto:abolarindaniel@yahoo.com">abolarindaniel@yahoo.com</a></li>
+                    <li><a href="tel:+234 803 484 5271">+234 803 484 5271</a></li>
+                    <li>Kwara, Nigeria</li>
+                    <li>24/7 Emergency Line</li>
+                </ul>
+            </div>
+
+            <div class="bottom">
+                &copy; 2026 <strong>Bouncer Protocol</strong>. All rights reserved. &bull; Private Protection &bull; Public Events Security
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============ JAVASCRIPT ============ -->
+    <script>
+        // ── Hamburger Toggle ──
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('open');
+        });
+
+        // Close nav on link click (mobile)
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('open');
+            });
+        });
+
+        // ── Smooth scroll for anchor links ──
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    const headerHeight = document.querySelector('header').offsetHeight;
+                    const targetPosition = target.getBoundingClientRect().top + window.scrollY - headerHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // ── Navbar background on scroll ──
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 60) {
+                header.style.background = 'rgba(10, 14, 23, 0.96)';
+                header.style.borderBottom = '1px solid rgba(201, 168, 76, 0.15)';
+            } else {
+                header.style.background = 'rgba(10, 14, 23, 0.92)';
+                header.style.borderBottom = '1px solid rgba(201, 168, 76, 0.08)';
+            }
+        });
+    </script>
+
+</body>
+</html>
